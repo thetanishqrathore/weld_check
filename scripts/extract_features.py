@@ -9,7 +9,7 @@ def extract_features(input_dir, output_dir):
     os.makedirs(output_dir, exist_ok=True)
     
     # Reload original ROIs for overlay visualization
-    roi_dir = '/Users/tanishqrathore/Developer/weld_check_v2/images/phase1_roi'
+    roi_dir = input_dir if input_dir else '/Users/tanishqrathore/Developer/weld_check_v2/images/phase1_roi'
     
     # We load the Gabor filter script's raw binary mask from the A test (Column 3)
     # However, since gabor_filter.py didn't save the raw binary masks to disk,
@@ -127,22 +127,37 @@ def extract_features(input_dir, output_dir):
             for false_keyhole in keyholes[1:]:
                 false_keyhole["Class"] = "General Porosity/Void"
 
+        # Isolated Image Overlay Copies
+        overlay_flash = orig_img.copy()
+        overlay_keyhole = orig_img.copy()
+        overlay_crack = orig_img.copy()
+        overlay_porosity = orig_img.copy()
+
         # Pass 3: Draw and save metrics
         for blob in blob_data:
             defect_class = blob["Class"]
             cX = blob["Centroid_X"]
             cY = blob["Centroid_Y"]
             
-            color = (200, 200, 200) # Gray
+            # Default to High-Contrast Green for General Porosity/Void
+            color = (0, 255, 0) 
+            target_overlay = overlay_porosity
+            
             if defect_class == "Flash/Edge Defect":
                 color = (255, 0, 255) # Magenta
+                target_overlay = overlay_flash
             elif defect_class == "Keyhole":
                 color = (0, 0, 255) # Red
+                target_overlay = overlay_keyhole
             elif defect_class == "Crack/Groove":
                 color = (0, 255, 255) # Yellow
+                target_overlay = overlay_crack
             
             cv2.drawContours(overlay, [blob["contour"]], -1, color, 2)
             cv2.putText(overlay, f"{defect_class}", (cX - 20, max(10, cY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1)
+            
+            cv2.drawContours(target_overlay, [blob["contour"]], -1, color, 2)
+            cv2.putText(target_overlay, f"{defect_class}", (cX - 20, max(10, cY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1)
             
             all_metrics.append({
                 "Image": img_id,
@@ -155,31 +170,70 @@ def extract_features(input_dir, output_dir):
             })
 
             
-        # Visualization output
-        fig, axes = plt.subplots(1, 4, figsize=(24, 6))
-        axes[0].imshow(cv2.cvtColor(orig_img, cv2.COLOR_BGR2RGB))
-        axes[0].set_title('Original ROI')
+        # --- VISUALIZATION OUTPUT ---
+        idx = img_id
         
-        axes[1].imshow(gabor_binary, cmap='gray')
-        axes[1].set_title('Phase 3: Shattered Gabor Mask')
-        
-        axes[2].imshow(clean_binary, cmap='gray')
-        axes[2].set_title('Phase 3.5: Morphological Fusion (Disk 15x15)')
-        
-        axes[3].imshow(cv2.cvtColor(overlay, cv2.COLOR_BGR2RGB))
-        axes[3].set_title('Phase 4: Geometric Class Overlay')
-        
-        for ax in axes: ax.axis('off')
-        
-        plt.tight_layout()
-        out_path = os.path.join(output_dir, f'extraction_{img_id}.png')
-        plt.savefig(out_path, dpi=150)
-        plt.close()
+        cv2.imwrite(os.path.join(output_dir, f'{idx}_01_fused_morphological_mask.png'), clean_binary)
+        cv2.imwrite(os.path.join(output_dir, f'{idx}_02_final_geometric_classification_overlay.png'), overlay)
+        cv2.imwrite(os.path.join(output_dir, f'{idx}_03_defect_flash.png'), overlay_flash)
+        cv2.imwrite(os.path.join(output_dir, f'{idx}_04_defect_keyhole.png'), overlay_keyhole)
+        cv2.imwrite(os.path.join(output_dir, f'{idx}_05_defect_crack.png'), overlay_crack)
+        cv2.imwrite(os.path.join(output_dir, f'{idx}_06_defect_porosity.png'), overlay_porosity)
         
     df = pd.DataFrame(all_metrics)
     csv_path = os.path.join(output_dir, 'defect_metrics.csv')
     df.to_csv(csv_path, index=False)
-    print(f"\\nExtraction complete. Metrics saved to {csv_path}")
+    
+    # --- ANALYTICS CHARTS ---
+    print("\\nGenerating Spatial Analytics & Statistical Reports...")
+    
+    color_map = {
+        'Keyhole': 'red',
+        'Flash/Edge Defect': 'blue', # User explicitly requested Blue in plot
+        'Crack/Groove': 'orange',
+        'General Porosity/Void': 'green'
+    }
+    
+    # 1. Defect Distribution (Bar Chart)
+    class_counts = df['Class'].value_counts()
+    plt.figure(figsize=(10, 6))
+    bar_colors = [color_map.get(x, 'gray') for x in class_counts.index]
+    plt.bar(class_counts.index, class_counts.values, color=bar_colors, edgecolor='black', alpha=0.8)
+    plt.title('Defect Distribution across All Welds', fontsize=16, fontweight='bold')
+    plt.xlabel('Defect Class', fontsize=12)
+    plt.ylabel('Quantified Count', fontsize=12)
+    for i, v in enumerate(class_counts.values):
+        plt.text(i, v + 0.5, str(v), ha='center', fontweight='bold', fontsize=12)
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'plot_01_defect_distribution.png'), dpi=150)
+    plt.close()
+    
+    # 2. Spatial Heatmap (Composite Top-Down View)
+    plt.figure(figsize=(14, 7))
+    for defect_type, col in color_map.items():
+        subset = df[df['Class'] == defect_type]
+        if not subset.empty:
+            plt.scatter(subset['Centroid_X'], subset['Centroid_Y'], 
+                        c=col, label=defect_type, s=120, alpha=0.7, edgecolors='k', zorder=5)
+            
+    plt.gca().invert_yaxis()
+    plt.title('Spatial Defect Composite Heatmap (X/Y Centroids)', fontsize=16, fontweight='bold')
+    plt.xlabel('X Coordinate (Longitudinal Extraction Path)', fontsize=12)
+    plt.ylabel('Y Coordinate (Transverse Extent)', fontsize=12)
+    
+    # Draw reference spatial boundary lines
+    # From Phase 1 Projection Profile + Extraction limits (H~300, W~950 approx)
+    plt.axhline(y=50, color='blue', linestyle='--', alpha=0.4, label='Flash Boundary Upper Phase 1')
+    plt.axhline(y=200, color='blue', linestyle='--', alpha=0.4, label='Flash Boundary Lower Phase 1')
+    plt.axvline(x=200, color='red', linestyle='--', alpha=0.4, label='Terminal Keyhole Region (X<20%)')
+    
+    plt.legend(loc='upper right', bbox_to_anchor=(1.25, 1))
+    plt.grid(True, linestyle='--', alpha=0.5, zorder=0)
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'plot_02_spatial_heatmap.png'), dpi=150)
+    plt.close()
+    
+    print(f"\\nExtraction complete. Metrics and Analytics saved to {output_dir}")
     print("\\nSample Metrics:")
     print(df.head(15))
 

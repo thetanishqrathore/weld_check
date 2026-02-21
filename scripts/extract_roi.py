@@ -65,46 +65,37 @@ def process_fsw_images(input_dir, output_dir):
         roi = img[y_min:y_max, :]
         
         # --- Visualization Generation ---
-        fig, axes = plt.subplots(1, 5, figsize=(24, 6))
+        idx = filename.replace(".png", "")
+        
+        # Save individual images
+        cv2.imwrite(os.path.join(output_dir, f'{idx}_01_blur.png'), blur)
+        cv2.imwrite(os.path.join(output_dir, f'{idx}_02_sobel_binary.png'), binary)
         
         # Original with lines
-        axes[0].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        axes[0].set_title('Original Image')
-        axes[0].axhline(y=y_min, color='r', linestyle='-', linewidth=2)
-        axes[0].axhline(y=y_max, color='r', linestyle='-', linewidth=2)
-        axes[0].axis('off')
-        
-        # Blurred
-        axes[1].imshow(blur, cmap='gray')
-        axes[1].set_title(f'Gaussian Blur ({kernel_size}x{kernel_size})')
-        axes[1].axis('off')
-        
-        # Binary Sobel
-        axes[2].imshow(binary, cmap='gray')
-        axes[2].set_title("Otsu's Binarization (Sobel Y)")
-        axes[2].axis('off')
-        
-        # Projection Profile
-        axes[3].plot(projection, range(len(projection)))
-        axes[3].invert_yaxis()
-        axes[3].set_title('Vertical Projection Profile')
-        axes[3].axhline(y=y_min, color='r', linestyle='--', linewidth=1.5, label='y_min')
-        axes[3].axhline(y=y_max, color='r', linestyle='--', linewidth=1.5, label='y_max')
-        axes[3].set_xlabel('Sum of White Pixels')
-        axes[3].set_ylabel('Y-coordinate (Rows)')
-        axes[3].legend()
-        
-        # Cropped ROI
-        axes[4].imshow(cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
-        axes[4].set_title('Extracted ROI')
-        axes[4].axis('off')
-        
+        fig_orig, ax_orig = plt.subplots(figsize=(6, 6))
+        ax_orig.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        ax_orig.axhline(y=y_min, color='r', linestyle='-', linewidth=2)
+        ax_orig.axhline(y=y_max, color='r', linestyle='-', linewidth=2)
+        ax_orig.axis('off')
         plt.tight_layout()
-        summary_path = os.path.join(output_dir, f'summary_{filename}')
-        plt.savefig(summary_path, dpi=150)
-        plt.close()
+        plt.savefig(os.path.join(output_dir, f'{idx}_03_original_bounds.png'), dpi=150)
+        plt.close(fig_orig)
         
-        roi_path = os.path.join(output_dir, f'roi_{filename}')
+        # Projection Profile Plot
+        fig_proj, ax_proj = plt.subplots(figsize=(6, 6))
+        ax_proj.plot(projection, range(len(projection)))
+        ax_proj.invert_yaxis()
+        ax_proj.axhline(y=y_min, color='r', linestyle='--', linewidth=1.5, label='y_min')
+        ax_proj.axhline(y=y_max, color='r', linestyle='--', linewidth=1.5, label='y_max')
+        ax_proj.set_xlabel('Sum of White Pixels')
+        ax_proj.set_ylabel('Y-coordinate (Rows)')
+        ax_proj.legend()
+        plt.tight_layout()
+        plt.savefig(os.path.join(output_dir, f'{idx}_04_projection_profile.png'), dpi=150)
+        plt.close(fig_proj)
+        
+        # Save the actual ROI output
+        roi_path = os.path.join(output_dir, f'roi_{idx}.png')
         cv2.imwrite(roi_path, roi)
         
     print(f"\\nProcessing complete. All results saved to {output_dir}")

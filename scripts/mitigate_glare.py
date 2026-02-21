@@ -39,34 +39,17 @@ def process_glare(input_dir, output_dir):
         clahe_bgr = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
         
         # --- Visualization Generation ---
-        fig, axes = plt.subplots(1, 4, figsize=(20, 5))
+        idx = filename.replace("roi_", "").replace(".png", "")
         
-        axes[0].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        axes[0].set_title('Original ROI')
-        axes[0].axis('off')
+        cv2.imwrite(os.path.join(output_dir, f'{idx}_01_glare_mask.png'), dilated_mask)
+        cv2.imwrite(os.path.join(output_dir, f'{idx}_02_telea_inpainted.png'), inpainted)
         
-        axes[1].imshow(dilated_mask, cmap='gray')
-        axes[1].set_title('Dilated Glare Mask (>240)')
-        axes[1].axis('off')
+        # We will still save CLAHE since the pipeline theoretically keeps it for documentation,
+        # even if Phase 3 skips it.
+        clahe_path = os.path.join(output_dir, f'{idx}_03_clahe_norm.png')
+        cv2.imwrite(clahe_path, clahe_bgr)
         
-        axes[2].imshow(cv2.cvtColor(inpainted, cv2.COLOR_BGR2RGB))
-        axes[2].set_title('Inpainted ROI (Telea)')
-        axes[2].axis('off')
-        
-        axes[3].imshow(cv2.cvtColor(clahe_bgr, cv2.COLOR_BGR2RGB))
-        axes[3].set_title('Inpainted + CLAHE')
-        axes[3].axis('off')
-        
-        plt.tight_layout()
-        idx = filename.replace("roi_", "")
-        summary_path = os.path.join(output_dir, f'summary_glare_{idx}')
-        plt.savefig(summary_path, dpi=150)
-        plt.close()
-        
-        out_path = os.path.join(output_dir, f'norm_{idx}')
-        cv2.imwrite(out_path, clahe_bgr)
-        
-    print(f"\\nPhase 2 processing complete. Results saved to {output_dir}")
+    print(f"\nPhase 2 processing complete. Results saved to {output_dir}")
 
 if __name__ == "__main__":
     input_directory = '/Users/tanishqrathore/Developer/weld_check_v2/images/phase1_roi'
