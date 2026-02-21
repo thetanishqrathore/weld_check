@@ -1,0 +1,33 @@
+{
+  "shape": [
+    251,
+    1080
+  ],
+  "classes": {
+    "keyhole": {
+      "blob_count": 1,
+      "total_area_px": 4533,
+      "area_ratio_of_roi": 0.016722000885347497
+    },
+    "crack_tear": {
+      "blob_count": 6,
+      "total_area_px": 550,
+      "area_ratio_of_roi": 0.002028921351630515
+    },
+    "groove": {
+      "blob_count": 3,
+      "total_area_px": 33327,
+      "area_ratio_of_roi": 0.12294156706507305
+    },
+    "void_pit": {
+      "blob_count": 3,
+      "total_area_px": 781,
+      "area_ratio_of_roi": 0.002881068319315331
+    },
+    "excess_expulsion": {
+      "blob_count": 0,
+      "total_area_px": 0,
+      "area_ratio_of_roi": 0.0
+    }
+  }
+}

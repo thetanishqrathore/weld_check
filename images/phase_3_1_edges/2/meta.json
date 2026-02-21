@@ -1,0 +1,21 @@
+{
+  "input": "images/phase_3_keyhole/2/keyhole/05_roi_keyhole_blacked.png",
+  "shape": [
+    251,
+    1080
+  ],
+  "params": {
+    "macro_blur_sigma": 2.0,
+    "dog_s1": 1.0,
+    "dog_s2": 4.0,
+    "macro_canny": [
+      40,
+      120
+    ],
+    "recon_ksize": 19,
+    "micro_canny": [
+      25,
+      90
+    ]
+  }
+}

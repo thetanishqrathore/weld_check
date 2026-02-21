@@ -1,0 +1,27 @@
+{
+  "shape": [
+    251,
+    1080
+  ],
+  "params": {
+    "crack_min_span": 28,
+    "crack_min_aspect": 4.0,
+    "groove_min_aspect": 2.0,
+    "groove_angle_deg": 35.0,
+    "groove_min_minor": 4.0,
+    "groove_close": [
+      21,
+      3
+    ],
+    "edge_band_px": 30,
+    "expulsion_min_area": 120
+  },
+  "counts": {
+    "keyhole_px": 4533,
+    "crack_px": 550,
+    "groove_px": 33327,
+    "void_px": 781,
+    "expulsion_px": 0,
+    "all_px": 38653
+  }
+}
