@@ -1,46 +1,55 @@
-import os
+import subprocess
 import sys
+import os
+import time
+from pathlib import Path
 
-# Ensure scripts directory is in path for imports
-sys.path.append(os.path.join(os.path.dirname(__file__), 'scripts'))
-
-from extract_roi import process_fsw_images
-from mitigate_glare import process_glare
-from gabor_filter import run_ab_test
-from extract_features import extract_features
+def run_script(script_path: str):
+    print(f"\n{'='*60}")
+    print(f"🚀 Starting: {script_path}")
+    print(f"{'='*60}")
+    
+    start_time = time.time()
+    result = subprocess.run([sys.executable, script_path])
+    elapsed = time.time() - start_time
+    
+    if result.returncode != 0:
+        print(f"\n❌ Error executing {script_path}. Exiting.")
+        sys.exit(result.returncode)
+        
+    print(f"\n✅ Finished {script_path} in {elapsed:.1f}s")
+    print("-" * 60)
 
 def main():
-    base_dir = os.path.join(os.path.dirname(__file__), 'images')
+    # Ensure we run from the project root
+    project_root = Path(__file__).parent.absolute()
+    os.chdir(project_root)
     
-    # Define directories
-    raw_dir = os.path.join(base_dir, 'raw_')
-    roi_dir = os.path.join(base_dir, 'phase1_roi')
-    glare_dir = os.path.join(base_dir, 'phase2_glare')
-    gabor_dir = os.path.join(base_dir, 'phase3_gabor')
-    extraction_dir = os.path.join(base_dir, 'phase4_extraction')
+    if not (project_root / "images" / "raw_").exists():
+        print("⚠️ Warning: 'images/raw_' directory not found.")
+        print("Please ensure your raw images are placed in 'images/raw_'.")
     
-    print("==================================================")
-    print("   FRICTION STIR WELDING DEFECT PIPELINE v2.0     ")
-    print("==================================================\\n")
-
-    print("[1/4] Phase 1: Dynamic ROI Extraction")
-    process_fsw_images(raw_dir, roi_dir)
-    print("--------------------------------------------------")
-
-    print("[2/4] Phase 2: Illumination Normalization (Glare Mitigation)")
-    process_glare(roi_dir, glare_dir)
-    print("--------------------------------------------------")
+    scripts_to_run = [
+        "scripts/phase1_illumination_flattening.py",
+        "scripts/phase2_weld_roi_boundaries.py",
+        "scripts/phase3_keyhole_module.py",
+        "scripts/phase3_1_traverse_edges.py",
+        "scripts/phase3_2_defect_masks.py",
+        "scripts/phase4_classify_defects.py",
+        "scripts/phase5_metrics_and_plots.py",
+    ]
     
-    print("[3/4] Phase 3: Gabor Filter Bank (Frequency Analysis)")
-    # run_ab_test uses the phase1_roi images internally, so we pass roi_dir as input
-    run_ab_test(roi_dir, gabor_dir)
-    print("--------------------------------------------------")
-
-    print("[4/4] Phase 4 & 5: Morphological Fusion & Spatial-Geometric Classification")
-    # extract_features uses the phase1_roi images internally to re-create the pipeline before extracting
-    extract_features(roi_dir, extraction_dir)
-    print("==================================================")
-    print("PIPELINE EXECUTION COMPLETE. Review images/phase4_extraction for Defect Analytics.")
+    total_start = time.time()
+    for script in scripts_to_run:
+        script_full_path = project_root / script
+        if not script_full_path.exists():
+            print(f"❌ Script not found: {script_full_path}")
+            sys.exit(1)
+            
+        run_script(script)
+        
+    total_elapsed = time.time() - total_start
+    print(f"\n🎉 Entire pipeline completed successfully in {total_elapsed:.1f}s.")
 
 if __name__ == "__main__":
     main()

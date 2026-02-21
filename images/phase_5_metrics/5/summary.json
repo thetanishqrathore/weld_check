@@ -6,23 +6,23 @@
   "classes": {
     "keyhole": {
       "blob_count": 1,
-      "total_area_px": 34017,
-      "area_ratio_of_roi": 0.11709004543577034
+      "total_area_px": 35345,
+      "area_ratio_of_roi": 0.12166115930056451
     },
     "crack_tear": {
-      "blob_count": 6,
-      "total_area_px": 498,
-      "area_ratio_of_roi": 0.0017141676992978108
+      "blob_count": 0,
+      "total_area_px": 0,
+      "area_ratio_of_roi": 0.0
     },
     "groove": {
-      "blob_count": 9,
-      "total_area_px": 16979,
-      "area_ratio_of_roi": 0.058443480655376565
+      "blob_count": 10,
+      "total_area_px": 22911,
+      "area_ratio_of_roi": 0.07886204047914085
     },
     "void_pit": {
-      "blob_count": 13,
-      "total_area_px": 9766,
-      "area_ratio_of_roi": 0.033615585846069114
+      "blob_count": 8,
+      "total_area_px": 4812,
+      "area_ratio_of_roi": 0.016563403552251135
     },
     "excess_expulsion": {
       "blob_count": 0,

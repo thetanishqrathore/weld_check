@@ -16,12 +16,12 @@
     "min_area": 120
   },
   "micro": {
-    "hi_pctl": 98.7,
+    "hi_pctl": 99.1,
     "lo_pctl": 96.5,
-    "hi_thr": 240.0,
+    "hi_thr": 255.0,
     "lo_thr": 183.0,
     "grow_iters": 200,
-    "open": 1,
+    "open": 3,
     "min_area": 60
   }
 }

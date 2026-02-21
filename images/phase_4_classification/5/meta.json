@@ -13,15 +13,15 @@
       21,
       3
     ],
-    "edge_band_px": 30,
+    "edge_band_px": 22,
     "expulsion_min_area": 120
   },
   "counts": {
-    "keyhole_px": 34017,
-    "crack_px": 498,
-    "groove_px": 16979,
-    "void_px": 9766,
+    "keyhole_px": 35345,
+    "crack_px": 0,
+    "groove_px": 22911,
+    "void_px": 4812,
     "expulsion_px": 0,
-    "all_px": 60880
+    "all_px": 63066
   }
 }

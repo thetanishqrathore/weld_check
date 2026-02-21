@@ -8,7 +8,7 @@
     "dog_s1": 2.0,
     "dog_s2": 10.0,
     "macro_pctl": 92.0,
-    "thr_macro": 133.0,
+    "thr_macro": 131.0,
     "close": [
       9,
       5
@@ -16,12 +16,12 @@
     "min_area": 120
   },
   "micro": {
-    "hi_pctl": 98.7,
+    "hi_pctl": 99.1,
     "lo_pctl": 96.5,
-    "hi_thr": 239.0,
-    "lo_thr": 187.0,
+    "hi_thr": 255.0,
+    "lo_thr": 185.0,
     "grow_iters": 200,
-    "open": 1,
+    "open": 3,
     "min_area": 60
   }
 }
