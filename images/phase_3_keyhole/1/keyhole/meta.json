@@ -1,0 +1,24 @@
+{
+  "input_roi": "images/phase_2_weld_roi_boundaries/1/03_roi.png",
+  "roi_shape": [
+    235,
+    1080
+  ],
+  "left_window": {
+    "x0": 0,
+    "x1": 216,
+    "left_frac": 0.2
+  },
+  "detected": true,
+  "result": {
+    "method": "hough_circle",
+    "cx": 93,
+    "cy": 92,
+    "r": 48,
+    "score": 2.1731026440606738,
+    "axis_ratio": 1.0,
+    "area_px": 7238.229473870883
+  },
+  "accepted": true,
+  "reason": null
+}

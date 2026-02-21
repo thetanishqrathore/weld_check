@@ -1,0 +1,46 @@
+{
+  "input": "images/raw_/5.png",
+  "params": {
+    "homo_sigma": 45.0,
+    "homo_strength": 1.0,
+    "hi_percentile": 99.5,
+    "hi_min_area": 80,
+    "hi_dilate": 3,
+    "inpaint_radius": 3,
+    "inpaint_method": "telea",
+    "clahe_clip": 2.0,
+    "clahe_tiles": 8
+  },
+  "stats_before": {
+    "shape": [
+      320,
+      1080
+    ],
+    "min": 11,
+    "max": 255,
+    "mean": 144.79203414351852,
+    "p1": 49.0,
+    "p50": 147.0,
+    "p99": 251.0,
+    "saturated_px": 5076,
+    "saturated_ratio": 0.0146875,
+    "highlight_mask_px": 0,
+    "highlight_mask_ratio": 0.0
+  },
+  "stats_after": {
+    "shape": [
+      320,
+      1080
+    ],
+    "min": 0,
+    "max": 255,
+    "mean": 103.99457175925926,
+    "p1": 0.0,
+    "p50": 99.0,
+    "p99": 241.0,
+    "saturated_px": 2654,
+    "saturated_ratio": 0.007679398148148148,
+    "highlight_mask_px": 2353,
+    "highlight_mask_ratio": 0.006808449074074074
+  }
+}

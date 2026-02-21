@@ -1,0 +1,20 @@
+{
+  "input": "images/raw_/7.png",
+  "shape": [
+    320,
+    1080
+  ],
+  "params": {
+    "kernel_size": 51,
+    "proj_frac": 0.2,
+    "proj_percentile": 85,
+    "padding": 10,
+    "thr": 394.5999999999999,
+    "max_peak": 855.0,
+    "proj_percentile_value": 394.5999999999999
+  },
+  "roi": {
+    "y_min": 18,
+    "y_max": 310
+  }
+}
