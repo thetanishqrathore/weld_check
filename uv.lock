@@ -529,7 +529,7 @@ wheels = [
 ]
 
 [[package]]
-name = "weld-check-v2"
+name = "weld-check"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

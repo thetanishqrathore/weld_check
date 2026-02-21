@@ -1,6 +1,6 @@
-# Weld Check v2 Pipeline Walkthrough
+# Weld Check Pipeline Walkthrough
 
-This document outlines the entire end-to-end Friction Stir Welding (FSW) defect analysis pipeline implemented in `weld_check_v2`. The pipeline processes raw optical images of welds through five distinct phases to extract, emphasize, classify, and measure surface anomalies.
+This document outlines the entire end-to-end Friction Stir Welding (FSW) defect analysis pipeline implemented in `weld_check`. The pipeline processes raw optical images of welds through five distinct phases to extract, emphasize, classify, and measure surface anomalies.
 
 The entire process is orchestrated by `main.py`, which sequences the scripts sequentially.
 

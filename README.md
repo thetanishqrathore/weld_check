@@ -1,6 +1,6 @@
-# Weld Check v2
+# Weld Check
 
-Weld Check v2 is a comprehensive computer vision pipeline designed for the automated analysis and classification of surface defects in Friction Stir Welding (FSW) optical images. It utilizes classical image processing, spatial-geometric heuristics, and morphological analysis to extract highly accurate defect measurements without the need for large training datasets.
+Weld Check is a comprehensive computer vision pipeline designed for the automated analysis and classification of surface defects in Friction Stir Welding (FSW) optical images. It utilizes classical image processing, spatial-geometric heuristics, and morphological analysis to extract highly accurate defect measurements without the need for large training datasets.
 
 ## Pipeline Overview
 
