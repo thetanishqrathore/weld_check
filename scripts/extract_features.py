@@ -66,6 +66,7 @@ def extract_features(input_dir, output_dir):
         # Dimensions for spatial bounds
         h, w = orig_img.shape[:2]
         
+        blob_data = []
         for i, contour in enumerate(contours):
             area = cv2.contourArea(contour)
             if area < 50: continue # Skip noise
@@ -95,32 +96,62 @@ def extract_features(input_dir, output_dir):
             aspect_ratio = major_axis / minor_axis
             
             defect_class = "General Porosity/Void" # Tier 3: Exhaustive Catch-all
-            color = (200, 200, 200) # Gray
             
             # Tier 1: Spatial Filters
             if cY < (0.15 * h) or cY > (0.85 * h):
                 defect_class = "Flash/Edge Defect"
-                color = (255, 0, 255) # Magenta
             elif cX < (0.20 * w) and aspect_ratio < 2.5:
                 defect_class = "Keyhole"
-                color = (0, 0, 255) # Red
             else:
                 # Tier 2: Geometric Filters (Scale-invariant)
                 if aspect_ratio >= 3.0:
                     defect_class = "Crack/Groove"
-                    color = (0, 255, 255) # Yellow
             
-            cv2.drawContours(overlay, [contour], -1, color, 2)
-            cv2.putText(overlay, f"{defect_class}", (cX - 20, max(10, cY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1)
-            
-            all_metrics.append({
-                "Image": img_id,
+            blob_data.append({
+                "contour": contour,
                 "Blob_ID": i,
                 "Class": defect_class,
                 "Centroid_X": cX,
                 "Centroid_Y": cY,
                 "Area_px": round(area, 2),
                 "Aspect_Ratio": round(aspect_ratio, 2)
+            })
+
+        # Tier 1 Conflict Resolution: Master Keyhole Aggregation
+        # A single weld run can only produce one terminal keyhole.
+        keyholes = [b for b in blob_data if b["Class"] == "Keyhole"]
+        if len(keyholes) > 1:
+            # The true keyhole is the one closest to the physical extraction point (lowest X)
+            keyholes.sort(key=lambda x: x["Centroid_X"])
+            # Keep the first one, downgrade all others to Tier 3 Porosity/Void
+            for false_keyhole in keyholes[1:]:
+                false_keyhole["Class"] = "General Porosity/Void"
+
+        # Pass 3: Draw and save metrics
+        for blob in blob_data:
+            defect_class = blob["Class"]
+            cX = blob["Centroid_X"]
+            cY = blob["Centroid_Y"]
+            
+            color = (200, 200, 200) # Gray
+            if defect_class == "Flash/Edge Defect":
+                color = (255, 0, 255) # Magenta
+            elif defect_class == "Keyhole":
+                color = (0, 0, 255) # Red
+            elif defect_class == "Crack/Groove":
+                color = (0, 255, 255) # Yellow
+            
+            cv2.drawContours(overlay, [blob["contour"]], -1, color, 2)
+            cv2.putText(overlay, f"{defect_class}", (cX - 20, max(10, cY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1)
+            
+            all_metrics.append({
+                "Image": img_id,
+                "Blob_ID": blob["Blob_ID"],
+                "Class": defect_class,
+                "Centroid_X": cX,
+                "Centroid_Y": cY,
+                "Area_px": blob["Area_px"],
+                "Aspect_Ratio": blob["Aspect_Ratio"]
             })
 
             

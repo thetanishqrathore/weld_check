@@ -1,0 +1,82 @@
+# Phase 1: Dynamic ROI Extraction Results
+
+The Phase 1 Sub-Task has successfully run the Sobel-Y vertical projection algorithm.
+
+We executed the following pipeline on your 7 raw images:
+1. Massive Gaussian Blur (51x51 kernel) to destroy internal onion-ring texture.
+2. Sobel Y filter (CV_64F depth to capture both negative/positive gradients).
+3. Otsu binarization to create a stark horizontal-edge mask.
+4. Vertical projection (summing the white pixels across the Y-axis).
+5. Dynamic thresholding (20% of the maximum projection peak) to find the strict top and bottom boundaries of the region.
+
+Here are the results. Each row contains: the Original Image with extracted red bounds, the Blurred Image, the binary Sobel map, the 1D Projection Profile graph, and finally the Cropped Region of Interest.
+
+![Summary 1](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase1_roi/summary_1.png)
+![Summary 2](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase1_roi/summary_2.png)
+![Summary 3](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase1_roi/summary_3.png)
+![Summary 4](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase1_roi/summary_4.png)
+![Summary 5](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase1_roi/summary_5.png)
+![Summary 6](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase1_roi/summary_6.png)
+![Summary 7](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase1_roi/summary_7.png)
+
+## Phase 2: Illumination Normalization & Glare Mitigation
+
+We executed the sequence strictly on the dynamic Region of Interest (ROI) isolated in Phase 1:
+1. **Glare Masking**: A rigid binary threshold (> 240 intensity) targeting strictly the blown-out specular highlights.
+2. **Dilation**: A 5x5 morphological dilation to envelop the transitional optical fringe surrounding the pure white glare.
+3. **Inpainting**: Mathematical reconstruction using the Telea algorithm (Fast Marching Method) to synthesize the missing metal underneath without creating massive artifact halos.
+4. **CLAHE**: After generating a mathematically continuous metal surface without pure-white glare holes, we converted to LAB color space and applied CLAHE strictly to the Lightness (L) channel. Notice how the background ambient gradient flattens without over-amplifying artifact boundaries.
+
+Here are the results. From left to right: Original ROI, Dilated Glare Mask, Inpainted ROI, and finally Inpainted + CLAHE.
+
+![Glare 1](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase2_glare/summary_glare_1.png)
+![Glare 2](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase2_glare/summary_glare_2.png)
+![Glare 3](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase2_glare/summary_glare_3.png)
+![Glare 4](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase2_glare/summary_glare_4.png)
+![Glare 5](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase2_glare/summary_glare_5.png)
+![Glare 6](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase2_glare/summary_glare_6.png)
+![Glare 7](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase2_glare/summary_glare_7.png)
+
+## Phase 3: Unsupervised Defect Segmentation (Gabor A/B Test)
+
+We completely abandoned the brittle morphological operations from the 2016 paper. Instead, we constructed a **Gabor Filter Bank** (Orientations: 0°, 45°, 90°, 135° | Wavelengths: 5, 10, 15) to perform spatial frequency analysis.
+
+By convolving the image through the bank and saving the maximum response, we generated a **Texture Energy Map**. We then applied a strict adaptive statistical threshold (`Mean + 2σ`) to segment only the severe structural anomalies (the defects).
+
+To prove the architectural flaw of using CLAHE prior to frequency analysis, we ran a strict A/B test:
+- **Row 1**: Phase 2 Inpainted Only (Clean Signal)
+- **Row 2**: Phase 2 Inpainted + CLAHE (Corrupted Signal)
+
+As predicted, CLAHE acts as a noise amplifier. It artificially boosts the local contrast of healthy "onion rings" and minor scratches to the point that the Gabor bank flags them as structural defects, completely shredding the `Mean + 2σ` threshold. The "Inpainted Only" signal produces vastly superior, isolated defect blobs.
+
+![Gabor A/B 1](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase3_gabor/gabor_ab_1.png)
+![Gabor A/B 2](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase3_gabor/gabor_ab_2.png)
+![Gabor A/B 3](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase3_gabor/gabor_ab_3.png)
+![Gabor A/B 4](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase3_gabor/gabor_ab_4.png)
+![Gabor A/B 5](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase3_gabor/gabor_ab_5.png)
+![Gabor A/B 6](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase3_gabor/gabor_ab_6.png)
+![Gabor A/B 7](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase3_gabor/gabor_ab_7.png)
+
+## Phase 4 & 5: Morphological Fusion & Spatial-Geometric Hierarchy
+
+To bridge the gap between pixel-level frequency analysis and object-level geometric classification, we applied a **Morphological Closing** operation (Dilation followed by Erosion) utilizing a heavy 15x15 contour disk. This functioned like a gravitational pull, fusing the fragmented crescent lines together into solid object masses.
+
+However, adding a 15px border warp to our anomalies meant we could no longer rely on the absolute pixel thresholds from the 2016 paper. We tore down their flat 2D logic tree and built a robust 3-Tier **Spatial-Geometric Hierarchy**:
+
+1.  **Tier 1: Spatial Context (The Engine Room)**
+    *   **Flash (Magenta)**: Before measuring geometry, we check the centroid Y-coordinate. Any anomaly existing in the top 15% or bottom 15% of our extracted ROI is mathematically classified as Flash.
+    *   **Keyhole (Red)**: We check the centroid X-coordinate. If a heavily circular blob (`Aspect Ratio < 2.5`) exists in the extreme left 20% of the plate, it is flagged as the terminal Key-hole.
+2.  **Tier 2: Scale-Invariant Geometry**
+    *   **Crack/Groove (Yellow)**: For internal anomalies, we ignore absolute area and rely purely on scale-invariant eccentricity. If the `Aspect Ratio >= 3.0`, the anomaly is a highly directional crack or trench.
+3.  **Tier 3: Exhaustive Catch-All**
+    *   **General Porosity/Void (White Label/Gray Blob)**: Any internal anomaly that is not highly directional falls securely into the final bucket. We have formally eliminated the fatal "Unknown" defect paradox.
+
+Here are the structural progression results. From left to right: Original ROI, Shattered Gabor Mask (Phase 3), Morphological Fusion (Phase 4), and the Tiered Spatial-Geometric Output (Phase 5).
+
+![Classification 1](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase5_classification/extraction_1.png)
+![Classification 2](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase5_classification/extraction_2.png)
+![Classification 3](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase5_classification/extraction_3.png)
+![Classification 4](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase5_classification/extraction_4.png)
+![Classification 5](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase5_classification/extraction_5.png)
+![Classification 6](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase5_classification/extraction_6.png)
+![Classification 7](/Users/tanishqrathore/.gemini/antigravity/brain/53495b15-ed0f-448d-9cab-7aa6739a1475/phase5_classification/extraction_7.png)
